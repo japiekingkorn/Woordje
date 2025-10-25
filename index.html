@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Woord Ketting Spel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background 0.3s ease;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            gap: 20px;
+        }
+
+        .info-box {
+            background: #f0f0f0;
+            padding: 15px 25px;
+            border-radius: 10px;
+            flex: 1;
+        }
+
+        .info-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .timer {
+            color: #2ecc71;
+            font-size: 2.5em !important;
+        }
+
+        .category-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .word-display {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border: 3px solid #667eea;
+        }
+
+        .current-word {
+            font-size: 2.2em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .instruction {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .next-letter {
+            color: #e74c3c;
+            font-weight: bold;
+            font-size: 1.3em;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.3em;
+            border: 3px solid #ddd;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: bold;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .used-words {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+        }
+
+        .used-words h3 {
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .word-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .word-tag {
+            background: #e8eaf6;
+            color: #667eea;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        .error {
+            color: #e74c3c;
+            font-weight: bold;
+            margin-top: 10px;
+            min-height: 25px;
+        }
+
+        .start-screen {
+            text-align: center;
+        }
+
+        .start-screen p {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .game-over {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .game-over h2 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+
+        .final-score {
+            font-size: 3em;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="startScreen" class="start-screen">
+            <h1>🎯 Woord Ketting Spel</h1>
+            <p>
+                Je krijgt een woord en een categorie.<br>
+                Bedenk een woord dat:<br>
+                ✓ Begint met de laatste letter van het vorige woord<br>
+                ✓ Past bij de categorie<br>
+                ✓ Nog niet gebruikt is<br>
+                <br>
+                Je hebt <strong>15 seconden</strong> per woord!
+            </p>
+            <button onclick="startGame()">Start Spel</button>
+        </div>
+
+        <div id="gameScreen" class="hidden">
+            <h1>🎯 Woord Ketting</h1>
+            
+            <div class="game-info">
+                <div class="info-box">
+                    <div class="info-label">Beurt</div>
+                    <div class="info-value" id="turnCounter">0</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-label">Tijd</div>
+                    <div class="info-value timer" id="timer">15</div>
+                </div>
+            </div>
+
+            <div class="category-box">
+                Categorie: <span id="category"></span>
+            </div>
+
+            <div class="word-display">
+                <div class="current-word" id="currentWord"></div>
+                <div class="instruction">
+                    Jouw woord moet beginnen met: <span class="next-letter" id="nextLetter"></span>
+                </div>
+            </div>
+
+            <input type="text" id="wordInput" placeholder="Type je woord..." autocomplete="off">
+            <div class="error" id="errorMessage"></div>
+            <button onclick="submitWord()">Bevestig Woord</button>
+
+            <div class="used-words">
+                <h3>Gebruikte woorden:</h3>
+                <div class="word-list" id="usedWordsList"></div>
+            </div>
+        </div>
+
+        <div id="gameOverScreen" class="hidden">
+            <div class="game-over">
+                <h2>Game Over!</h2>
+                <div class="final-score" id="finalScore"></div>
+                <p>woorden voltooid</p>
+            </div>
+            <div class="used-words">
+                <h3>Jouw woorden:</h3>
+                <div class="word-list" id="finalWordsList"></div>
+            </div>
+            <button onclick="location.reload()">Opnieuw Spelen</button>
+        </div>
+    </div>
+
+    <script>
+        const categories = [
+            'Dieren',
+            'Landen/Steden',
+            'Voedsel',
+            'Beroepen',
+            'Voorwerpen',
+            'Planten/Bloemen'
+        ];
+
+        const startWords = [
+            'appel', 'banaan', 'computer', 'dolfijn', 'egel', 'fiets',
+            'gitaar', 'hond', 'ijsbeer', 'kat', 'lamp', 'muis',
+            'noot', 'olifant', 'piano', 'robot', 'stoel', 'tafel',
+            'uil', 'vis', 'wortel', 'zebra'
+        ];
+
+        let currentWord = '';
+        let currentCategory = '';
+        let usedWords = [];
+        let turnCount = 0;
+        let timeLeft = 15;
+        let timerInterval;
+
+        function startGame() {
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+            
+            currentCategory = categories[Math.floor(Math.random() * categories.length)];
+            currentWord = startWords[Math.floor(Math.random() * startWords.length)];
+            
+            usedWords.push(currentWord);
+            turnCount = 0;
+            
+            updateDisplay();
+            startTimer();
+        }
+
+        function updateDisplay() {
+            document.getElementById('category').textContent = currentCategory;
+            document.getElementById('currentWord').textContent = currentWord.toUpperCase();
+            document.getElementById('nextLetter').textContent = currentWord.slice(-1).toUpperCase();
+            document.getElementById('turnCounter').textContent = turnCount;
+            updateUsedWords();
+        }
+
+        function updateUsedWords() {
+            const wordsList = document.getElementById('usedWordsList');
+            wordsList.innerHTML = '';
+            usedWords.forEach(word => {
+                const tag = document.createElement('div');
+                tag.className = 'word-tag';
+                tag.textContent = word;
+                wordsList.appendChild(tag);
+            });
+        }
+
+        function startTimer() {
+            timeLeft = 15;
+            updateTimerDisplay();
+            
+            if (timerInterval) clearInterval(timerInterval);
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                updateBackgroundColor();
+                
+                if (timeLeft <= 0) {
+                    gameOver();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const timerElement = document.getElementById('timer');
+            timerElement.textContent = timeLeft;
+            
+            if (timeLeft <= 5) {
+                timerElement.style.color = '#e74c3c';
+            } else if (timeLeft <= 8) {
+                timerElement.style.color = '#f39c12';
+            } else {
+                timerElement.style.color = '#2ecc71';
+            }
+        }
+
+        function updateBackgroundColor() {
+            const progress = timeLeft / 15;
+            let r, g, b;
+            
+            if (progress > 0.5) {
+                // Groen naar Geel
+                const localProgress = (progress - 0.5) * 2;
+                r = Math.round(46 + (244 - 46) * (1 - localProgress));
+                g = Math.round(204 + (208 - 204) * (1 - localProgress));
+                b = Math.round(113 + (63 - 113) * (1 - localProgress));
+            } else {
+                // Geel naar Rood
+                const localProgress = progress * 2;
+                r = Math.round(244 + (231 - 244) * (1 - localProgress));
+                g = Math.round(208 + (76 - 208) * (1 - localProgress));
+                b = Math.round(63 + (60 - 63) * (1 - localProgress));
+            }
+            
+            document.body.style.background = `rgb(${r}, ${g}, ${b})`;
+        }
+
+        function submitWord() {
+            const input = document.getElementById('wordInput');
+            const word = input.value.trim().toLowerCase();
+            const errorElement = document.getElementById('errorMessage');
+            
+            errorElement.textContent = '';
+            
+            if (!word) {
+                errorElement.textContent = '❌ Voer een woord in!';
+                return;
+            }
+            
+            const requiredLetter = currentWord.slice(-1).toLowerCase();
+            if (word[0] !== requiredLetter) {
+                errorElement.textContent = `❌ Je woord moet beginnen met "${requiredLetter.toUpperCase()}"!`;
+                return;
+            }
+            
+            if (usedWords.includes(word)) {
+                errorElement.textContent = '❌ Dit woord is al gebruikt!';
+                return;
+            }
+            
+            // Woord geaccepteerd!
+            currentWord = word;
+            usedWords.push(word);
+            turnCount++;
+            input.value = '';
+            
+            updateDisplay();
+            startTimer();
+        }
+
+        function gameOver() {
+            clearInterval(timerInterval);
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('gameOverScreen').classList.remove('hidden');
+            document.getElementById('finalScore').textContent = turnCount;
+            
+            const finalWordsList = document.getElementById('finalWordsList');
+            finalWordsList.innerHTML = '';
+            usedWords.forEach(word => {
+                const tag = document.createElement('div');
+                tag.className = 'word-tag';
+                tag.textContent = word;
+                finalWordsList.appendChild(tag);
+            });
+            
+            document.body.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        }
+
+        // Enter toets functionaliteit
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('wordInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    submitWord();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
