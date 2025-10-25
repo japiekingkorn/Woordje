@@ -321,6 +321,11 @@
             
             updateDisplay();
             startTimer();
+            
+            // Focus op input zodat toetsenbord meteen verschijnt
+            setTimeout(() => {
+                document.getElementById('wordInput').focus();
+            }, 100);
         }
 
         function updateDisplay() {
@@ -410,17 +415,20 @@
             
             if (!word) {
                 errorElement.textContent = '❌ Voer een woord in!';
+                input.focus();
                 return;
             }
             
             const requiredLetter = currentWord.slice(-1).toLowerCase();
             if (word[0] !== requiredLetter) {
                 errorElement.textContent = `❌ Je woord moet beginnen met "${requiredLetter.toUpperCase()}"!`;
+                input.focus();
                 return;
             }
             
             if (usedWords.includes(word)) {
                 errorElement.textContent = '❌ Dit woord is al gebruikt!';
+                input.focus();
                 return;
             }
             
@@ -435,6 +443,9 @@
             
             updateDisplay();
             startTimer();
+            
+            // Focus terug op input zodat toetsenbord open blijft
+            input.focus();
         }
 
         function gameOver() {
